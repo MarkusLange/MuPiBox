@@ -458,5 +458,8 @@
 		"button": "off",
 		"step": 5
 	}
+	"tweaks": {
+		"vnc": "1"
+	}
 }
 

@@ -348,7 +348,7 @@ rm -Rf /home/dietpi/mupibox.zip /home/dietpi/MuPiBox-* >&3 2>&3
 	echo -e "XXX\n${STEP}\nCopy DietPi config... \nXXX"
 	before=$(date +%s)
 	mv -f ${MUPI_SRC}/config/templates/asound.conf /etc/asound.conf >&3 2>&3
-	mv -f ${MUPI_SRC}/config/templates/smb.conf /etc/samba/smb.conf >&3 2>&3
+	#mv -f ${MUPI_SRC}/config/templates/smb.conf /etc/samba/smb.conf >&3 2>&3
 	after=$(date +%s)
 	echo -e "## Copy DietPi config ## finished after $((after - before)) seconds" >&3 2>&3
 	STEP=$((STEP + 1))
@@ -480,6 +480,54 @@ rm -Rf /home/dietpi/mupibox.zip /home/dietpi/MuPiBox-* >&3 2>&3
 	after=$(date +%s)
 	echo -e "## Bluetooth support ## finished after $((after - before)) seconds" >&3 2>&3
 	STEP=$((STEP + 1))
+	
+	###############################################################################################
+
+	echo -e "XXX\n${STEP}\nPreconfigure Samba... \nXXX"
+	before=$(date +%s)
+	
+	apt-get --yes install samba wsdd2 >&3 2>&3
+	(echo "mupibox"; echo "mupibox") | smbpasswd -s -a dietpi >&3 2>&3
+	systemctl stop smbd.service >&3 2>&3
+	systemctl stop wsdd2.service >&3 2>&3
+	systemctl disable smbd.service >&3 2>&3
+	systemctl disable wsdd2.service >&3 2>&3
+	mv -f ${MUPI_SRC}/config/templates/smb.conf /etc/samba/smb.conf >&3 2>&3
+	
+	after=$(date +%s)
+	echo -e "## Preconfigure Samba ## finished after $((after - before)) seconds" >&3 2>&3
+	STEP=$((STEP + 1))
+	
+	###############################################################################################
+
+	echo -e "XXX\n${STEP}\nPreconfigure FTP... \nXXX"
+	before=$(date +%s)
+	
+	apt-get --yes install proftpd  >&3 2>&3
+	systemctl stop proftpd.service >&3 2>&3
+	systemctl disable proftpd.service >&3 2>&3
+	mv -f ${MUPI_SRC}/config/templates/proftpd.conf /etc/proftpd/proftpd.conf >&3 2>&3
+	
+	after=$(date +%s)
+	echo -e "## Preconfigure FTP ## finished after $((after - before)) seconds" >&3 2>&3
+	STEP=$((STEP + 1))
+	
+	###############################################################################################
+
+	echo -e "XXX\n${STEP}\nPreconfigure VNC... \nXXX"
+	before=$(date +%s)
+	
+	apt-get --yes install x11vnc websockify >&3 2>&3
+	git clone https://github.com/novnc/noVNC.git /usr/share/novnc >&3 2>&3
+	chown -R dietpi:dietpi /usr/share/novnc >&3 2>&3
+	systemctl disable mupi_vnc.service >&3 2>&3
+	systemctl disable mupi_novnc.service >&3 2>&3
+	systemctl stop mupi_vnc.service >&3 2>&3
+	systemctl stop mupi_novnc.service >&3 2>&3
+	
+	after=$(date +%s)
+	echo -e "## Preconfigure VNC ## finished after $((after - before)) seconds" >&3 2>&3
+	STEP=$((STEP + 1))
 
 	###############################################################################################
 
@@ -512,7 +560,7 @@ rm -Rf /home/dietpi/mupibox.zip /home/dietpi/MuPiBox-* >&3 2>&3
 
 	echo -e "XXX\n${STEP}\nSet environment... \nXXX"
 	before=$(date +%s)
-	(echo "mupibox"; echo "mupibox") | smbpasswd -s -a dietpi >&3 2>&3
+	#(echo "mupibox"; echo "mupibox") | smbpasswd -s -a dietpi >&3 2>&3
 	THEME_FILE="/home/dietpi/.mupibox/Sonos-Kids-Controller-master/www/active_theme.css"
 	ln -sf /home/dietpi/MuPiBox/themes/blue.css ${THEME_FILE} >&3 2>&3
 	echo "www-data ALL=(ALL:ALL) NOPASSWD: ALL" | tee /etc/sudoers.d/www-data >&3 2>&3

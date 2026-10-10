@@ -123,23 +123,15 @@
 		exec("sudo systemctl stop mupi_novnc.service");
 		exec("sudo systemctl disable mupi_vnc.service");
 		exec("sudo systemctl disable mupi_novnc.service");
-		exec("sudo apt-get remove x11vnc websockify -y");
-		exec("sudo pkill websockify");		
-		exec("sudo rm -R /usr/share/novnc");
-		exec("sudo su - -c \"/usr/bin/cat <<< $(/usr/bin/jq --arg v \"0\" '.tweaks.vnc = $v' /etc/mupibox/mupiboxconfig.json) >  /etc/mupibox/mupiboxconfig.json\"");
 		$change=1;
 		$CHANGE_TXT=$CHANGE_TXT."<li>VNC-Services disabled</li>";
 		}
 	else if( $_POST['change_vnc'] == "enable & start" )
 		{
-		exec("sudo apt-get install x11vnc websockify -y");
-		exec("sudo git clone https://github.com/novnc/noVNC.git /usr/share/novnc");
-		exec("sudo chown -R dietpi:dietpi /usr/share/novnc");
 		exec("sudo systemctl enable mupi_vnc.service");
 		exec("sudo systemctl enable mupi_novnc.service");
 		exec("sudo systemctl start mupi_vnc.service");
 		exec("sudo systemctl start mupi_novnc.service");		
-		exec("sudo su - -c \"/usr/bin/cat <<< $(/usr/bin/jq --arg v \"1\" '.tweaks.vnc = $v' /etc/mupibox/mupiboxconfig.json) >  /etc/mupibox/mupiboxconfig.json\"");
 		$change=1;
 		$CHANGE_TXT=$CHANGE_TXT."<li>VNC-Services enabled and started</li>";
 		}
@@ -161,14 +153,14 @@
 		
 	if( $_POST['change_samba'] == "enable & start" )
 		{
-		$command = "sudo apt-get install samba wsdd -y && sudo wget https://raw.githubusercontent.com/splitti/MuPiBox/main/config/templates/smb.conf -O /etc/samba/smb.conf && sudo systemctl enable smbd.service && sudo systemctl start smbd.service && (echo 'mupibox'; echo 'mupibox') | sudo smbpasswd -s -a 'dietpi'";
+		$command = "sudo systemctl enable smbd.service && sudo systemctl start smbd.service && sudo systemctl enable wsdd2.service && sudo systemctl start wsdd2.service";
 		exec($command, $output, $result );
 		$change=1;
 		$CHANGE_TXT=$CHANGE_TXT."<li>Samba enabled</li>";
 		}
 	else if( $_POST['change_samba'] == "stop & disable" )
 		{
-		$command = "sudo systemctl stop smbd.service && sudo systemctl disable smbd.service && sudo apt-get remove samba wsdd -y";
+		$command = "sudo systemctl stop smbd.service && sudo systemctl disable smbd.service && sudo systemctl stop wsdd2.service && sudo systemctl disable wsdd2.service";
 		exec($command, $output, $result );
 		$change=1;
 		$CHANGE_TXT=$CHANGE_TXT."<li>Samba disabled</li>";
@@ -207,14 +199,14 @@
 
 	if( $_POST['change_ftp'] == "enable & start" )
 		{
-		$command = " sudo apt-get install proftpd -y && sudo apt-get install samba -y && sudo wget https://raw.githubusercontent.com/splitti/MuPiBox/main/config/templates/proftpd.conf -O /etc/proftpd/proftpd.conf && sudo systemctl restart proftpd";
+		$command = "sudo systemctl enable proftpd.service && sudo systemctl start proftpd.service";
 		exec($command, $output, $result );
 		$change=1;
 		$CHANGE_TXT=$CHANGE_TXT."<li>FTP enabled</li>";
 		}
 	else if( $_POST['change_ftp'] == "stop & disable" )
 		{
-		$command = "sudo systemctl stop proftpd.service && sudo systemctl disable proftpd.service && sudo apt-get remove proftpd -y";
+		$command = "sudo systemctl stop proftpd.service && sudo systemctl disable proftpd.service";
 		exec($command, $output, $result );
 		$change=1;
 		$CHANGE_TXT=$CHANGE_TXT."<li>FTP disabled</li>";
